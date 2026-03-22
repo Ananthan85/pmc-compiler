@@ -1,2 +1,3 @@
 # meta-compiler
-a harmless attempt o compile multiple languages in a single file cause why not :)
+a harmless attempt to compile multiple languages in a single file cause why not :)
+Made with <3
