@@ -1,0 +1,25 @@
+@go
+package main
+
+/*
+extern void calibrate_sensors(int* data, int size);
+*/
+import "C"
+
+func main() {
+    // Simulated engine temperature readings (10 readings)
+    // We use a static array so your Z3 scanner can find the bound!
+    var engine_temps = [10]int32{90, 92, 95, 98, 105, 110, 108, 102, 97, 94}
+
+    println("--- BMW M5 F90 Telemetry System ---")
+    println("Status: Reading 10 sensor nodes...")
+
+    // Pass the data to the C engine for calibration
+    C.calibrate_sensors((*C.int)(&engine_temps[0]), 10)
+
+    println("Calibration complete. Engine safe.")
+}
+
+@c
+#include <stdio.h>
+void tinygo_longjmp() {}

@@ -1,0 +1,45 @@
+@c
+#include <stdio.h>
+
+// dummy func to shut the linker up. do not delete.
+void tinygo_longjmp() {}
+
+// declaring variables in C memory space
+int loop_start = 3;
+int loop_max = 7;
+
+// a c function to print the current loop state
+void print_from_c(int val) {
+    printf("   -> C block confirming: counter is at %d\n", val);
+}
+
+@go
+package main
+
+/*
+// telling Go to look for these in the C memory
+extern int loop_start;
+extern int loop_max;
+extern void print_from_c(int val);
+*/
+import "C"
+import "fmt"
+
+func main() {
+    // pulling the raw values directly from C globals!
+    start := int(C.loop_start)
+    max := int(C.loop_max)
+    
+    fmt.Printf("Go read C variables successfully. Start: %d, Max: %d\n\n", start, max)
+    
+    // go running the loop based on c's limits
+    for i := start; i <= max; i++ {
+        fmt.Println("Go loop iteration:", i)
+        
+        // throwing the variable back to C just to prove they are linked
+        C.print_from_c(C.int(i))
+    }
+    
+    fmt.Println("\nLoop finished.")
+}
+

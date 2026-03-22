@@ -1,0 +1,29 @@
+@go
+package main
+
+/*
+// s6 mini project - calculator v1
+// todo: add scan f for user input later.. 
+extern void init_calc();
+extern void compute(int a, int b, char op);
+extern void print_log();
+*/
+import "C"
+
+func main() {
+println("--- POLYGLOT CALC v0.1 ---")
+   C.init_calc()
+
+    // testing basic ops
+  C.compute(10, 5, '+')
+     C.compute(20, 2, '/')
+  C.compute(7, 3, '*')
+    C.compute(100, 50, '-')
+  
+  println("\nGenerating report...")
+  C.print_log()
+}
+
+@c
+#include <stdio.h>
+void tinygo_longjmp() {} // dont remove this or tinygo crashes

@@ -1,0 +1,84 @@
+#!/usr/bin/env python3
+import time
+import subprocess
+import os
+import re
+
+CUSTOM_COMPILER = "compiler.py"
+POLY_FILES = ["bench_main.poly", "bench_math.poly"]
+PATH_ENV = f"PATH={os.environ['HOME']}/sdk/go1.22.0/bin:{os.environ['PATH']}"
+
+def sys_cmd(cmd, env_prefix=""):
+    full_cmd = f"{env_prefix} {cmd}" if env_prefix else cmd
+    t0 = time.perf_counter()
+    proc = subprocess.run(full_cmd, shell=True, capture_output=True, text=True)
+    t1 = time.perf_counter()
+    return (t1 - t0), proc.stdout.strip()
+
+print("init bench_seq_v1...")
+print("chk_target: pmc_fusion")
+
+# 1. Compile with your PMC
+print(">> sys_cc: compiling pmc...")
+sys_cmd(f"python3 {CUSTOM_COMPILER} {' '.join(POLY_FILES)}", env_prefix=PATH_ENV)
+
+# 2. Run PMC Binary
+print(">> exec_pmc...")
+pmc_exec_time, pmc_out = sys_cmd("./pmc_binary")
+
+# 3. Dynamically Generate and Compile Baseline
+print(">> sig_extract: bench_math.poly @c_blk")
+
+try:
+    with open("bench_math.poly", "r") as f:
+        math_content = f.read()
+except FileNotFoundError:
+    print("err: EOF or file missing")
+    exit(1)
+
+# Extract the @c block
+c_match = re.search(r'@c\n(.*)', math_content, re.DOTALL)
+extracted_c_code = c_match.group(1).strip() if c_match else ""
+
+# Wrap your exact C function in a standard C main loop
+c_baseline = f"""
+#include <stdio.h>
+
+{extracted_c_code}
+
+int main() {{
+    int count = 0;
+    int limit = 250000;
+    for (int i = 2; i < limit; i++) {{
+        if (is_prime(i) == 1) count++;
+    }}
+    printf("Primes found: %d\\n", count);
+    return 0;
+}}
+"""
+
+with open("tmp_base.c", "w") as f:
+    f.write(c_baseline)
+
+print(">> sys_cc: compiling gcc_raw (-O3)...")
+os.system("gcc -O3 tmp_base.c -o gcc_bin")
+
+print(">> exec_gcc...")
+gcc_exec_time, gcc_out = sys_cmd("./gcc_bin")
+
+# 4. The "Bad UNIX" Results Dump
+m_stat = "OK" if pmc_out == gcc_out else "ERR_MISMATCH"
+overhead = ((pmc_exec_time - gcc_exec_time) / gcc_exec_time) * 100
+
+print("\n--- sys_stat_dump ---")
+print("target\ttime(s)\t\tchk")
+print(f"pmc\t{pmc_exec_time:.5f}\t\t{m_stat}")
+print(f"gcc\t{gcc_exec_time:.5f}\t\t{m_stat}")
+print("---------------------")
+print(f"ovr_head:\t+{overhead:.2f}%")
+print("msg: metric incl. abi_ctx_switch_tax")
+print("EOF.")
+
+# Cleanup
+if os.path.exists("tmp_base.c"): os.remove("tmp_base.c")
+if os.path.exists("gcc_bin"): os.remove("gcc_bin")

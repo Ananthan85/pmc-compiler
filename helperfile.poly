@@ -1,0 +1,21 @@
+@go
+package main
+// we just need the package name so the compiler knows it belongs to the same app
+// just bea tit
+@c
+#include <stdio.h>
+
+void get_student_info() {
+    printf("Student Name: Ananthakrishnan\n");
+    printf("Department: Computer Science and Engineering\n");
+}
+
+void calculate_average(int* marks, int count) {
+    int sum = 0;
+    for(int i = 0; i < count; i++) {
+        sum = sum + marks[i];
+    }
+    float avg = (float)sum / count;
+    printf("Total Marks: %d\n", sum);
+    printf("Average: %.2f\n", avg);
+}

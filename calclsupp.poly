@@ -1,0 +1,40 @@
+@go
+package main
+// same package so it links correctly
+
+@c
+#include <stdio.h>
+
+// history buffer - only holds 5 results. 
+// if we do more, Z3 should catch it!
+int results[5]; 
+int ptr = 0;
+
+void init_calc() {
+    printf("[System] Math engine loaded.\n");
+}
+
+void compute(int a, int b, char op) {
+    int res = 0;
+    
+  if (op == '+') res = a + b;
+  else if (op == '-') res = a - b;
+  else if (op == '*') res = a * b;
+  else if (op == '/') {
+      if(b != 0) res = a / b;
+  }
+
+printf("Result: %d %c %d = %d\n", a, op, b, res);
+
+    // bug: no check if ptr > 5! 
+    // but our PMC should catch it.
+    results[ptr] = res;
+    ptr++;
+}
+
+void print_log() {
+printf("History Log:\n");
+for(int i=0; i < ptr; i++) {
+    printf("  Item %d: %d\n", i, results[i]);
+}
+}

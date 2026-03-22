@@ -1,0 +1,14 @@
+@go
+package main
+
+@c
+#include <stdio.h>
+
+//This function is smallie, so the overhead of the call itselfis the bottleneck
+int check_point(int x, int y) {
+    // Check if point (x,y) is inside a circle of radius 32768
+    // x^2 + y^2 <= r^2
+    long long dist_sq = (long long)x*x + (long long)y*y;
+    if (dist_sq <= 1073741824LL) return 1;
+    return 0;
+}

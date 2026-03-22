@@ -1,0 +1,59 @@
+@go
+package main
+// haha fakeresss
+/*
+extern void bubble_sort(int* arr, int size);
+extern void print_arr(int* arr, int size);
+*/
+import "C"
+#not simpeeeleee
+func main() {
+    // an array of 8 random numbers
+    var numbers [8]int32
+    numbers[0] = 64
+    numbers[1] = 34
+    numbers[2] = 25
+    numbers[3] = 12
+    numbers[4] = 22
+    numbers[5] = 11
+    numbers[6] = 90
+    numbers[7] = 5
+
+    println("Unsorted Array:")
+    C.print_arr((*C.int)(&numbers[0]), 8)
+
+    // passing to C to do the sorting
+    C.bubble_sort((*C.int)(&numbers[0]), 8)
+
+    println("Sorted Array:")
+    C.print_arr((*C.int)(&numbers[0]), 8)
+}
+
+@c
+#include <stdio.h>
+
+// required for the compiler
+void tinygo_longjmp() {} 
+
+void print_arr(int* arr, int size) {
+    for(int i = 0; i < size; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\n");
+}
+
+void bubble_sort(int* arr, int size) {
+    // standard bubble sort logic
+    for(int i = 0; i < size - 1; i++) {
+        for(int j = 0; j < size - i - 1; j++) {
+            
+            // if the current element is bigger than the next one, swap them
+            if(arr[j] > arr[j+1]) {
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+            }
+            
+        }
+    }
+}

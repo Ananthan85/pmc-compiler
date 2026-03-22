@@ -1,0 +1,26 @@
+# Compiled binaries and executables
+pmc_binary
+*.out
+*.exe
+bin/
+
+# Intermediate LLVM and object files
+*.ll
+*.bc
+*.o
+*.s
+
+# Python virtual environments and caches
+venv/
+env/
+__pycache__/
+*.pyc
+
+# OS generated files
+.DS_Store
+gcc_binary
+loop
+main
+meta_bin
+tmp_*
+stitched.go

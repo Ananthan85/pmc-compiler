@@ -1,0 +1,70 @@
+@go
+package main
+
+/*
+extern void _D_calc_f(int* a, int l);
+extern void _D_print_f(int* a, int l);
+*/
+import "C"
+
+func main() {
+    // idk why but 15 is the max before it segfaults on my machine
+    // TODO: dynamically allocate this later
+    var _fib_buf [15]int32
+    var _lim int = 15
+    
+    // fmt.Println("debug: passing to C") 
+
+    // raw ptr cast cuz tinygo complains otherwise
+    C._D_calc_f((*C.int)(&_fib_buf[0]), C.int(_lim))
+    
+    C._D_print_f((*C.int)(&_fib_buf[0]), C.int(_lim))
+}
+
+@c
+#include <stdio.h>
+
+// dummy for tinygo linker bs
+void tinygo_longjmp() {} 
+
+void _D_calc_f(int* arr, int lim) {
+    int _i_tmp;
+    int _D_val;
+    
+    // base
+    arr[0] = 0;
+    arr[1] = 1;
+    
+    _i_tmp = 2;
+_L_LOOP_HEAD:
+    if (_i_tmp >= lim) goto _L_LOOP_END; else goto _L_LOOP_BODY;
+
+_L_LOOP_BODY:
+    // printf("calc iter %d\n", _i_tmp); // uncomment if it breaks again
+    _D_val = arr[_i_tmp-1] + arr[_i_tmp-2];
+    arr[_i_tmp] = _D_val;
+    
+    _i_tmp = _i_tmp + 1;
+    goto _L_LOOP_HEAD;
+
+_L_LOOP_END:
+    return;
+}
+
+void _D_print_f(int* arr, int lim) {
+    int i;
+    printf("fib out (lim=%d):\n", lim);
+    
+    i = 2; // skipping 0 and 1 because whatever
+_L_PR_HEAD:
+    if (i > lim - 1) goto _L_PR_END; else goto _L_PR_BODY;
+
+_L_PR_BODY:
+     printf("%d ", arr[i]);
+     i = i + 1;
+     goto _L_PR_HEAD;
+
+_L_PR_END:
+    printf("\n");
+    return;
+}

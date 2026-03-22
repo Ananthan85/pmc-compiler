@@ -1,0 +1,21 @@
+@go
+package main
+// Belongs to the same Go package 'pmc'
+
+@c
+#include <stdio.h>
+
+void calibrate_sensors(int* data, int size) {
+    printf("[ECU] Analyzing %d sensor inputs...\n", size);
+
+    for (int i = 0; i < size; i++) {
+        int temp = data[i];
+        
+        // Simulating some logic: alert if temp > 100
+        if (temp > 100) {
+            printf("  Warning: Node %d reporting High Temp: %d C\n", i, temp);
+        } else {
+            printf("  Node %d: %d C (Stable)\n", i, temp);
+        }
+    }
+}

@@ -1,0 +1,33 @@
+@go
+package main
+
+/*
+extern int check_point(int x, int y);
+*/
+import "C"
+
+func main() {
+    var iterations int32 = 10000000
+    var inside int32 = 0
+    
+    println("[Go] Starting Monte Carlo Pi Estimation (10M iterations)...")
+    
+    // We simulate random points using a linear congruential generator logic
+    for i := int32(0); i < iterations; i++ {
+        // Pseudo-random math in Go
+        x := (i * 1103515245 + 12345) % 32768
+        y := (i * 22695477 + 1) % 32768
+        
+        // High-frequency call to C guest
+        if C.check_point(C.int(x), C.int(y)) == 1 {
+            inside++
+        }
+    }
+    
+    // integer math for simplicity in bare-metal
+    result := (4000 * inside) / iterations
+    print("Estimated Pi * 1000: ", result, "\n")
+}
+
+@c
+void tinygo_longjmp() {}

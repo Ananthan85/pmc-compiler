@@ -1,0 +1,26 @@
+@go
+package main
+
+/*
+// we tell go that these functions exist somewhere else
+extern void get_student_info();
+extern void calculate_average(int* marks, int count);
+*/
+import "C"
+
+func main() {
+    // some sample marks
+    var marks = [5]int32{85, 90, 78, 92, 88}
+    
+    println("--- Student Report System ---")
+    
+    // calling C function from the other file
+    C.get_student_info()
+    
+    // passing array to C function in the other file
+    C.calculate_average((*C.int)(&marks[0]), 5)
+}
+
+@c
+#include <stdio.h>
+void tinygo_longjmp() {} // needed for tinygo

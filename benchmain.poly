@@ -1,0 +1,25 @@
+@go
+package main
+
+/*
+extern int is_prime(int n);
+*/
+import "C"
+
+func main() {
+    var count int32 = 0
+    var limit int32 = 250000 
+
+    // This loop forces 250,000 cross-language FFI calls
+    for i := int32(2); i < limit; i++ {
+        if C.is_prime(C.int(i)) == 1 {
+            count++
+        }
+    }
+    
+    // Output matches the C baseline exactly to prevent MISMATCH
+    print("Primes found: ", count, "\n")
+}
+
+@c
+void tinygo_longjmp() {}

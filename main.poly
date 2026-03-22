@@ -1,0 +1,40 @@
+@go
+package main
+
+/*
+extern void unsafe_c_math();
+*/
+import "C"
+import "fmt"
+
+//export GetSecureData
+func GetSecureData() *C.int {
+    // AST Scanner will dynamically find this length: 3
+    data := []int32{100, 200, 300} 
+    return (*C.int)(&data[0])
+}
+
+func main() {
+    fmt.Println("[Go Host] Executing cross-language test...")
+    C.unsafe_c_math()
+}
+
+@c
+#include <stdio.h>
+
+extern int* GetSecureData();
+void tinygo_longjmp() {} 
+
+void unsafe_c_math() {
+    int* ptr = GetSecureData();
+    
+    int base = 2;
+    int shift = 2;
+    
+    // Algebraic path: 2 + 2 = 4. 
+    // Array size is 3 (max index 2).
+    // Z3 MUST catch this before the binary is made.
+    int stolen_data = ptr[base + shift]; 
+    
+    printf("Data: %d\n", stolen_data);
+}

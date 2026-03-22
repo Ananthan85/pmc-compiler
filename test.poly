@@ -1,0 +1,32 @@
+@go
+package main
+
+import "C"
+import "fmt"
+
+//export GetBuffer
+func GetBuffer() *C.int {
+    // Our regex will auto-discover that this length is 5
+    data := []int32{100, 200, 300, 400, 500}
+    return (*C.int)(&data[0])
+}
+
+func main() {
+    fmt.Println("Polyglot Engine Initialized")
+}
+
+@c
+#include <stdio.h>
+
+// Tell C about the Go function
+extern int* GetBuffer();
+
+void process_data() {
+    int* buffer = GetBuffer();
+    
+    // THE MURDER WEAPON: 
+    // Go array only goes up to index 4. This should trigger Z3.
+    int unsafe_val = buffer[10]; 
+    
+    printf("Read value: %d\n", unsafe_val);
+}

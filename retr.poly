@@ -1,0 +1,23 @@
+@go
+package main
+
+/*
+Crazy comment:
+@c
+@go
+@c
+*/
+
+import "C"
+
+func main() {}
+
+@c
+#include <stdio.h>
+
+/*
+More junk:
+@go
+*/
+
+void foo() {}

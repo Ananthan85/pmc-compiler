@@ -1,0 +1,50 @@
+@go
+package main
+
+/*
+extern void process_matrix(int* data, int rows, int cols);
+*/
+import "C"
+
+func main() {
+    println("[Go Host] Allocating 3x3 Matrix...")
+    // 3x3 matrix = 9 elements
+
+    matrix := [9]int32{10, 20, 30, 40, 50, 60, 70, 80, 90}
+
+    println("[Go Host] Passing to C for nested loop processing...")
+    
+    // Pass the pointer, rows, and columns to the C guest
+    C.process_matrix((*C.int)(&matrix[0]), 3, 3)
+
+    println("[Go Host] Matrix processed successfully!")
+}
+
+@c
+#include <stdio.h>
+
+// Required to bypass TinyGo's internal panic unwinder
+void tinygo_longjmp() {} 
+
+void process_matrix(int* data, int rows, int cols) {
+    printf("[C Guest] Running nested loops...\n");
+
+    int i = 0;
+    // Outer Loop: 'while' loop
+    while (i < rows) {
+        
+        // Inner Loop: 'for' loop
+        for (int j = 0; j < cols; j++) {
+            
+            // Calculate 1D index from 2D coordinates
+            int index = (i * cols) + j;
+            
+            // Access the Go memory
+            int val = data[index];
+            
+            printf("  Element [%d][%d] (Index %d) = %d\n", i, j, index, val);
+        }
+        i++;
+    }
+    printf("[C Guest] Nested loops completed.\n\n");
+}
